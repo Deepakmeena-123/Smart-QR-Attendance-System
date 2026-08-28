@@ -3,37 +3,34 @@ import dj_database_url
 from .settings import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+# Temporarily enable DEBUG to see the actual error
+DEBUG = True
 
+# For now, use SQLite to get the app working, then we can migrate to PostgreSQL later
 # Parse database connection url
 DATABASE_URL = os.environ.get('DATABASE_URL')
+print(f"DATABASE_URL: {DATABASE_URL}")  # Debug
 
 if DATABASE_URL and 'postgres' in DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
-    print("Using PostgreSQL database for production")
+    print(f"Using PostgreSQL database: {DATABASES['default']['ENGINE']}")  # Debug
 else:
-    # Fallback to SQLite for development
+    # Use SQLite for now since PostgreSQL has compatibility issues with Python 3.13
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
-    print("Using SQLite database (fallback)")
+    print("Using SQLite database for compatibility")  # Debug
 
 # Use environment variable for secret key
 SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
 
-# Allowed hosts for production
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.onrender.com',
-    'student-attendance-system.onrender.com',
-    'my-pr-project-ztyg.onrender.com'
-]
+# Allow all hosts temporarily for debugging
+ALLOWED_HOSTS = ['*']
 
 # Enable WhiteNoise for static files
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')

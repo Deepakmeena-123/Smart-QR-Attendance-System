@@ -142,13 +142,6 @@ def staff_generate_qr(request):
                 "qr_code_url": qr_code_instance.qr_code_image.url,
                 "qr_data_url": qr_data_url,  # Include the base64 data URL
                 "expiry_time": qr_code_instance.expiry_time.strftime("%Y-%m-%d %H:%M:%S"),
-                "token": unique_token,  # Include token for sharing
-                "qr_data": qr_data,  # Include QR data URL for direct access
-                "subject_name": subject.subject_name,  # Include subject name
-                "session_year": f"{session_year.session_start_year}-{session_year.session_end_year}",  # Include session year
-                "expiry_minutes": int(expiry_minutes),  # Include expiry in minutes
-                "location_enabled": bool(teacher_latitude and teacher_longitude),  # Include location status
-                "allowed_radius": float(allowed_radius),  # Include allowed radius
             }
             print(f"Returning success response: {response_data}")  # Debug
             return JsonResponse(response_data)
@@ -501,6 +494,46 @@ def get_attendance_student(request):
     except Exception as e:
         print(f"Error getting attendance data: {str(e)}")
         return JsonResponse([], safe=False)
+        
+# @csrf_exempt
+# def get_attendance_student(request):
+#     attendance_date = request.POST.get('attendance_date')
+#     attendance = Attendance.objects.get(id=attendance_date)
+
+#     # Get ALL students enrolled in this course for this session year
+#     all_students = Students.objects.filter(
+#         course_id=attendance.subject_id.course_id, 
+#         session_year_id=attendance.session_year_id
+#     )
+    
+#     # Get existing attendance reports for this attendance
+#     existing_attendance_reports = AttendanceReport.objects.filter(attendance_id=attendance)
+#     existing_student_ids = existing_attendance_reports.values_list('student_id', flat=True)
+    
+#     list_data = []
+
+#     for student in all_students:
+#         # Check if student has marked attendance
+#         attendance_report = existing_attendance_reports.filter(student_id=student).first()
+        
+#         if attendance_report:
+#             # Student has marked attendance
+#             status = attendance_report.status
+#             location_verified = attendance_report.location_verified
+#         else:
+#             # Student hasn't marked attendance yet - mark as absent
+#             status = False
+#             location_verified = False
+        
+#         data_small = {
+#             "id": student.admin.id,
+#             "name": student.admin.first_name + " " + student.admin.last_name,
+#             "status": status,
+#             "location_verified": location_verified
+#         }
+#         list_data.append(data_small)
+
+#     return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
 
 
 @csrf_exempt
@@ -1052,7 +1085,7 @@ def staff_export_attendance_data(request):
         )
 
         # Prepare filename
-        filename = f"attendance_{subject.subject_name}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.xlsx"
+        filename = f"attendance_{start_date.strftime('%d-%m-%Y')}_{end_date.strftime('%d-%m-%Y')}.xlsx"
 
         # Read the file content instead of keeping it open
         with open(excel_file, 'rb') as f:

@@ -231,7 +231,7 @@ Scan QR Code
       }).addTo(map);
     }
 
-    // Get user's location - SECURITY: GPS ONLY, NO MANUAL INPUT
+    // Get user's location
     function getLocation() {
       if (navigator.geolocation) {
         $("#location-status").html(
@@ -240,21 +240,9 @@ Scan QR Code
 
         navigator.geolocation.getCurrentPosition(
           function (position) {
-            // SECURITY: Validate GPS coordinates before accepting
-            if (!isValidGPSCoordinates(position.coords.latitude, position.coords.longitude)) {
-              $("#location-status").html(
-                '<span class="text-danger"><i class="fas fa-exclamation-triangle mr-2"></i>Invalid GPS coordinates detected!</span>'
-              );
-              return;
-            }
-
-            // SECURITY: Add timestamp and additional validation
             locationData.latitude = position.coords.latitude;
             locationData.longitude = position.coords.longitude;
             locationData.accuracy = position.coords.accuracy; // Capture accuracy in meters
-            locationData.timestamp = position.timestamp; // Add timestamp for validation
-            locationData.altitude = position.coords.altitude; // Additional GPS data
-            locationData.altitudeAccuracy = position.coords.altitudeAccuracy;
 
             $("#location-status").html(
               '<span class="text-success"><i class="fas fa-check-circle mr-2"></i>Location acquired successfully!</span>'
@@ -552,19 +540,13 @@ Scan QR Code
         )
         .show();
 
-      // SECURITY: Prepare data with additional validation fields
+      // Prepare data to send to server (IP-based network verification only)
       const data = {
         token: token,
         latitude: locationData.latitude || null,
         longitude: locationData.longitude || null,
         accuracy: locationData.accuracy || null,
-        timestamp: locationData.timestamp || null, // GPS timestamp for validation
-        altitude: locationData.altitude || null, // Additional GPS data
-        altitudeAccuracy: locationData.altitudeAccuracy || null,
         network_ssid: null, // IP-based verification only
-        // SECURITY: Add client-side validation flag
-        gps_source: 'browser_geolocation', // Indicates GPS source
-        validation_hash: generateLocationHash(locationData) // Security hash
       };
 
       // Send data to server
@@ -705,62 +687,6 @@ Scan QR Code
 
     // Refresh location periodically
     setInterval(getLocation, 30000); // Every 30 seconds
-
-    // SECURITY: GPS validation functions
-    function isValidGPSCoordinates(lat, lon) {
-      // Basic coordinate validation
-      if (typeof lat !== 'number' || typeof lon !== 'number') return false;
-      if (isNaN(lat) || isNaN(lon)) return false;
-      if (lat < -90 || lat > 90) return false;
-      if (lon < -180 || lon > 180) return false;
-
-      // SECURITY: Check for suspicious patterns
-      if (lat === 0 && lon === 0) return false; // Null Island
-      if (lat.toString().length < 5 || lon.toString().length < 5) return false; // Too simple
-
-      return true;
-    }
-
-    function generateLocationHash(locationData) {
-      // SECURITY: Generate a simple hash for location validation
-      if (!locationData.latitude || !locationData.longitude) return null;
-
-      const combined = locationData.latitude.toString() +
-                      locationData.longitude.toString() +
-                      (locationData.timestamp || Date.now()).toString();
-
-      // Simple hash function (in production, use crypto.subtle.digest)
-      let hash = 0;
-      for (let i = 0; i < combined.length; i++) {
-        const char = combined.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-      }
-      return Math.abs(hash).toString(16);
-    }
-
-    // SECURITY: Prevent location manipulation via console
-    Object.defineProperty(window, 'locationData', {
-      writable: false,
-      configurable: false
-    });
-
-    // SECURITY: Monitor for suspicious activity
-    let locationChangeCount = 0;
-    const originalLocationData = {};
-
-    function monitorLocationChanges() {
-      if (locationData.latitude !== originalLocationData.latitude ||
-          locationData.longitude !== originalLocationData.longitude) {
-        locationChangeCount++;
-        if (locationChangeCount > 3) {
-          console.warn('SECURITY: Suspicious location changes detected');
-          $("#location-status").html(
-            '<span class="text-danger"><i class="fas fa-shield-alt mr-2"></i>Security warning: Multiple location changes detected</span>'
-          );
-        }
-      }
-    }
 
     // Check if we have a token from external QR code scan
     {% if attendance_token %}

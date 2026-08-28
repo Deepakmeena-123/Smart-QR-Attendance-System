@@ -3,22 +3,24 @@ services:
     name: student-attendance-system
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn student_management_system.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --max-requests 1000 --timeout 30"
+    startCommand: "gunicorn student_management_system.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.9
+        value: 3.13.4
       - key: DATABASE_URL
-        value: "postgresql://mu_pr_project_postgre_user:fQNcO7qrQqPqr5X0E0uY95ayZ4dBdc7O@dpg-d285m76uk2gs73etehng-a.oregon-postgres.render.com/mu_pr_project_postgre"
+        fromDatabase:
+          name: student_attendance_db
+          property: connectionString
       - key: SECRET_KEY
         generateValue: true
-      - key: DEBUG
-        value: true
-      - key: RENDER_EXTERNAL_HOSTNAME
-        value: my-pr-project-zqyg.onrender.com
       - key: DJANGO_SETTINGS_MODULE
         value: student_management_system.settings_production
       - key: WEB_CONCURRENCY
-        value: 1
-      - key: PYTHONUNBUFFERED
-        value: 1
+        value: 4
     autoDeploy: true
+
+databases:
+  - name: student_attendance_db
+    plan: free
+    databaseName: student_attendance
+    user: student_attendance_user

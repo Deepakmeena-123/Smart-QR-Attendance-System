@@ -97,12 +97,9 @@
                             <label for="qr_image">QR Code Image:</label>
                             <input type="file" id="qr_image" name="qr_image" class="form-control" accept="image/*" required>
                         </div>
-                        <!-- SECURITY: Protected location fields - GPS ONLY -->
-                        <input type="hidden" id="latitude" name="latitude" readonly>
-                        <input type="hidden" id="longitude" name="longitude" readonly>
-                        <input type="hidden" id="gps_timestamp" name="gps_timestamp" readonly>
-                        <input type="hidden" id="gps_accuracy" name="gps_accuracy" readonly>
-                        <input type="hidden" id="location_hash" name="location_hash" readonly>
+                        <!-- Hidden fields for location data -->
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
                         
                             <button type="button" id="upload_qr_btn" class="btn custom-btn">Upload</button>
                         </form>
@@ -296,18 +293,9 @@
                         studentMarker = L.marker([currentPosition.lat, currentPosition.lng]).addTo(map);
                     }
                     
-                    // SECURITY: Validate GPS coordinates before accepting
-                    if (!isValidGPSCoordinates(currentPosition.lat, currentPosition.lng)) {
-                        $('#locationStatus').html('<div class="alert alert-danger">Invalid GPS coordinates detected!</div>');
-                        return;
-                    }
-
-                    // SECURITY: Update protected form fields with validation
+                    // Update hidden form fields
                     $('#latitude').val(currentPosition.lat);
                     $('#longitude').val(currentPosition.lng);
-                    $('#gps_timestamp').val(currentPosition.timestamp);
-                    $('#gps_accuracy').val(currentPosition.accuracy);
-                    $('#location_hash').val(generateLocationHash(currentPosition));
                     
                     // Update status with detailed location info
                     $('#locationStatus').html(
@@ -381,23 +369,10 @@
                 return;
             }
             
-            // SECURITY: Strict location validation
+            // Check if location is available
             if (!currentPosition) {
                 alert("Location is required to mark attendance. Please allow location access and try again.");
                 getLocation();
-                return;
-            }
-
-            // SECURITY: Validate location data integrity
-            if (!isValidGPSCoordinates(currentPosition.lat, currentPosition.lng)) {
-                alert("Invalid location data detected. Please refresh and try again.");
-                return;
-            }
-
-            // SECURITY: Check for location manipulation
-            const expectedHash = generateLocationHash(currentPosition);
-            if ($('#location_hash').val() !== expectedHash) {
-                alert("Location data integrity check failed. Please refresh and try again.");
                 return;
             }
 
@@ -593,56 +568,6 @@
             }
         });
     }
-
-    // SECURITY: GPS validation functions
-    function isValidGPSCoordinates(lat, lon) {
-        // Basic coordinate validation
-        if (typeof lat !== 'number' || typeof lon !== 'number') return false;
-        if (isNaN(lat) || isNaN(lon)) return false;
-        if (lat < -90 || lat > 90) return false;
-        if (lon < -180 || lon > 180) return false;
-
-        // SECURITY: Check for suspicious patterns
-        if (lat === 0 && lon === 0) return false; // Null Island
-        if (lat.toString().length < 5 || lon.toString().length < 5) return false; // Too simple
-
-        return true;
-    }
-
-    function generateLocationHash(position) {
-        // SECURITY: Generate a simple hash for location validation
-        if (!position.lat || !position.lng) return null;
-
-        const combined = position.lat.toString() +
-                        position.lng.toString() +
-                        (position.timestamp || Date.now()).toString();
-
-        // Simple hash function
-        let hash = 0;
-        for (let i = 0; i < combined.length; i++) {
-            const char = combined.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32-bit integer
-        }
-        return Math.abs(hash).toString(16);
-    }
-
-    // SECURITY: Protect form fields from manipulation
-    $(document).ready(function() {
-        // Make location fields readonly
-        $('#latitude, #longitude, #gps_timestamp, #gps_accuracy, #location_hash').attr('readonly', true);
-
-        // Monitor for tampering attempts
-        setInterval(function() {
-            if (currentPosition) {
-                const expectedHash = generateLocationHash(currentPosition);
-                if ($('#location_hash').val() !== expectedHash) {
-                    console.warn('SECURITY: Location data tampering detected');
-                    $('#locationStatus').html('<div class="alert alert-warning">Security warning: Location data integrity check failed</div>');
-                }
-            }
-        }, 5000); // Check every 5 seconds
-    });
 </script>
 {% endblock custom_js %}
 

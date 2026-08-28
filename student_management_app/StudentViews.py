@@ -87,38 +87,9 @@ def student_upload_qr(request):
             # Get the uploaded QR code image
             qr_image = request.FILES['qr_image']
 
-            # SECURITY: Get and validate student's location data
+            # Get student's location data
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
-            gps_timestamp = request.POST.get('gps_timestamp')
-            gps_accuracy = request.POST.get('gps_accuracy')
-            location_hash = request.POST.get('location_hash')
-
-            # SECURITY: Validate location data if provided
-            if latitude and longitude:
-                try:
-                    lat_float = float(latitude)
-                    lon_float = float(longitude)
-
-                    # SECURITY: Validate coordinate ranges
-                    if not (-90 <= lat_float <= 90) or not (-180 <= lon_float <= 180):
-                        return JsonResponse({
-                            'status': 'error',
-                            'message': 'Invalid GPS coordinates provided.'
-                        })
-
-                    # SECURITY: Check for suspicious patterns
-                    if lat_float == 0 and lon_float == 0:
-                        return JsonResponse({
-                            'status': 'error',
-                            'message': 'Invalid location detected. Please ensure GPS is enabled.'
-                        })
-
-                except (ValueError, TypeError):
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': 'Invalid location data format.'
-                    })
 
             # Open and process the QR code image
             try:
@@ -206,40 +177,15 @@ def student_upload_qr(request):
                         )
                         attendance.save()
 
-                    # SECURITY: Enhanced location verification with validation
+                    # Verify location if teacher's location is available
                     location_verified = False
                     if qr_code.teacher_latitude and qr_code.teacher_longitude and latitude and longitude:
-                        # SECURITY: Validate coordinates before processing
-                        try:
-                            student_lat = float(latitude)
-                            student_lon = float(longitude)
-                            teacher_lat = float(qr_code.teacher_latitude)
-                            teacher_lon = float(qr_code.teacher_longitude)
-                            allowed_radius = float(qr_code.allowed_radius)
-
-                            # SECURITY: Basic coordinate validation
-                            if not (-90 <= student_lat <= 90) or not (-180 <= student_lon <= 180):
-                                return JsonResponse({
-                                    'status': 'error',
-                                    'message': 'Invalid GPS coordinates provided.'
-                                })
-
-                            # SECURITY: Check for suspicious patterns
-                            if student_lat == 0 and student_lon == 0:
-                                return JsonResponse({
-                                    'status': 'error',
-                                    'message': 'Invalid location detected. Please ensure GPS is enabled.'
-                                })
-
-                            # SECURITY: Check if coordinates are suspiciously identical to teacher
-                            if abs(student_lat - teacher_lat) < 0.000001 and abs(student_lon - teacher_lon) < 0.000001:
-                                print("SECURITY WARNING: Student and teacher coordinates are suspiciously identical!")
-
-                        except (ValueError, TypeError):
-                            return JsonResponse({
-                                'status': 'error',
-                                'message': 'Invalid location data format.'
-                            })
+                        # Convert to float
+                        student_lat = float(latitude)
+                        student_lon = float(longitude)
+                        teacher_lat = float(qr_code.teacher_latitude)
+                        teacher_lon = float(qr_code.teacher_longitude)
+                        allowed_radius = float(qr_code.allowed_radius)
 
                         # Debug logging for upload QR
                         print(f"Upload QR Location verification debug:")
@@ -257,13 +203,6 @@ def student_upload_qr(request):
                         )
 
                         print(f"Upload QR Verification result: {verification_result}")
-
-                        # SECURITY: Enhanced logging and validation
-                        if not verification_result.get('is_reliable', True):
-                            print(f"SECURITY WARNING: Unreliable GPS data for student {student.admin.username}")
-
-                        # SECURITY: Log location verification attempt
-                        print(f"SECURITY LOG: Student {student.admin.username} location verification - Distance: {verification_result['distance']:.2f}m, Allowed: {verification_result.get('original_radius', allowed_radius)}m")
 
                         # Extract the boolean value for location verification
                         location_verified = bool(verification_result['is_within'])
@@ -654,6 +593,10 @@ def student_process_qr_scan(request):
                 )
 
                 attendance_report.save()
+
+                # Deactivate QR Code after successful attendance marking
+                # qr_code.is_active = False
+                # qr_code.save()
 
                 return JsonResponse({
                     'status': 'success',

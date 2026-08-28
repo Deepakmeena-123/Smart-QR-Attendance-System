@@ -207,63 +207,6 @@ Take Attendance
                     <p class="text-xs text-gray-500 mt-1">Students must be within the specified radius to mark attendance</p>
                 </div>
 
-                <!-- Location Input Section -->
-                <div id="locationSection" class="mb-6 border border-gray-200 rounded-lg p-4">
-                    <h4 class="text-sm font-medium text-gray-700 mb-3">Location Settings</h4>
-
-                    <!-- Location Method Selection -->
-                    <div class="mb-4">
-                        <div class="flex items-center space-x-4">
-                            <label class="flex items-center">
-                                <input type="radio" name="locationMethod" value="auto" id="autoLocation" checked class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
-                                <span class="ml-2 text-sm text-gray-700">Auto-detect my location</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="locationMethod" value="manual" id="manualLocation" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
-                                <span class="ml-2 text-sm text-gray-700">Enter location manually</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Auto Location Status -->
-                    <div id="autoLocationDiv" class="mb-4">
-                        <div id="locationStatus" class="text-sm text-gray-600">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Click "Generate QR Code" to auto-detect your location
-                        </div>
-                    </div>
-
-                    <!-- Manual Location Input -->
-                    <div id="manualLocationDiv" class="mb-4" style="display: none;">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="manualLatitude" class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-                                <input type="number" id="manualLatitude" step="any" placeholder="e.g., 40.7128" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                <p class="text-xs text-gray-500 mt-1">Decimal degrees (e.g., 40.7128)</p>
-                            </div>
-                            <div>
-                                <label for="manualLongitude" class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-                                <input type="number" id="manualLongitude" step="any" placeholder="e.g., -74.0060" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                <p class="text-xs text-gray-500 mt-1">Decimal degrees (e.g., -74.0060)</p>
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <button type="button" id="validateLocationBtn" class="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded border border-blue-200 hover:bg-blue-100">
-                                <i class="fas fa-map-marker-alt mr-1"></i>Validate Coordinates
-                            </button>
-                            <span id="locationValidation" class="ml-2 text-sm"></span>
-                        </div>
-                        <div class="mt-2 text-xs text-gray-500">
-                            <strong>Tip:</strong> You can get coordinates from Google Maps by right-clicking on a location and selecting the coordinates.
-                        </div>
-                    </div>
-
-                    <!-- Current Location Display -->
-                    <div id="currentLocationDisplay" class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                        <strong>Current Location:</strong> <span id="currentCoordinates">Not set</span>
-                    </div>
-                </div>
-
                 <!-- Hidden fields for location data -->
                 <input type="hidden" id="latitude" name="latitude" />
                 <input type="hidden" id="longitude" name="longitude" />
@@ -295,42 +238,6 @@ Take Attendance
                                 <p class="text-sm text-gray-600">Students can scan this QR code to mark their attendance</p>
                                 <div id="qrTimer" class="text-lg font-semibold text-red-600 mt-2">
                                     <!-- Timer will be displayed here -->
-                                </div>
-                            </div>
-
-                            <!-- Download and Share Buttons -->
-                            <div class="mt-6 pt-4 border-t border-gray-200">
-                                <h5 class="text-sm font-semibold text-gray-700 mb-3 text-center">QR Code Actions</h5>
-                                <div class="flex flex-wrap justify-center gap-3">
-                                    <button id="downloadQRBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm">
-                                        <i class="fas fa-download"></i>
-                                        Download QR
-                                    </button>
-                                    <button id="shareQRBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm">
-                                        <i class="fas fa-share-alt"></i>
-                                        Share QR
-                                    </button>
-                                    <button id="printQRBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm">
-                                        <i class="fas fa-print"></i>
-                                        Print QR
-                                    </button>
-                                    <button id="copyLinkBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm">
-                                        <i class="fas fa-link"></i>
-                                        Copy Link
-                                    </button>
-                                </div>
-
-                                <!-- QR Code Information -->
-                                <div class="mt-4 p-3 bg-gray-50 rounded-lg text-left">
-                                    <h6 class="text-xs font-semibold text-gray-700 mb-2">QR Code Details:</h6>
-                                    <div class="text-xs text-gray-600 space-y-1">
-                                        <div><strong>Subject:</strong> <span id="qrInfoSubject"></span></div>
-                                        <div><strong>Token:</strong> <span id="qrInfoToken" class="font-mono"></span></div>
-                                        <div><strong>Direct Link:</strong> <span id="qrInfoLink" class="font-mono break-all"></span></div>
-                                        <div><strong>Generated:</strong> <span id="qrInfoGenerated"></span></div>
-                                        <div><strong>Expires:</strong> <span id="qrInfoExpires"></span></div>
-                                        <div><strong>Location Required:</strong> <span id="qrInfoLocation"></span></div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -572,55 +479,14 @@ document.addEventListener("DOMContentLoaded", function(){
 
         // Get location if enabled
         if (enableLocation) {
-            const locationMethod = document.querySelector('input[name="locationMethod"]:checked').value;
-
-            if (locationMethod === 'auto') {
-                // Auto-detect location
-                document.getElementById('locationStatus').innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Detecting your location...';
-
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    document.getElementById('latitude').value = position.coords.latitude;
-                    document.getElementById('longitude').value = position.coords.longitude;
-
-                    // Update status and display
-                    document.getElementById('locationStatus').innerHTML = '<i class="fas fa-check-circle text-green-600 mr-1"></i>Location detected successfully';
-                    document.getElementById('currentCoordinates').textContent =
-                        position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6) +
-                        ' (±' + Math.round(position.coords.accuracy) + 'm accuracy)';
-
-                    generateQR();
-                }, function(error) {
-                    document.getElementById('locationStatus').innerHTML = '<i class="fas fa-exclamation-triangle text-red-600 mr-1"></i>Failed to detect location';
-                    showMessage('Location access required for QR generation. Please enable location or use manual input.', 'error');
-                });
-            } else {
-                // Manual location input
-                const manualLat = document.getElementById('manualLatitude').value;
-                const manualLon = document.getElementById('manualLongitude').value;
-
-                if (!manualLat || !manualLon) {
-                    showMessage('Please enter both latitude and longitude coordinates', 'error');
-                    return;
-                }
-
-                // Validate coordinates
-                const lat = parseFloat(manualLat);
-                const lon = parseFloat(manualLon);
-
-                if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-                    showMessage('Please enter valid coordinates (Latitude: -90 to 90, Longitude: -180 to 180)', 'error');
-                    return;
-                }
-
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lon;
-                document.getElementById('currentCoordinates').textContent = lat.toFixed(6) + ', ' + lon.toFixed(6) + ' (manually entered)';
-
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
                 generateQR();
-            }
+            }, function(error) {
+                showMessage('Location access required for QR generation', 'error');
+            });
         } else {
-            // No location verification
-            document.getElementById('currentCoordinates').textContent = 'Location verification disabled';
             generateQR();
         }
 
@@ -648,23 +514,9 @@ document.addEventListener("DOMContentLoaded", function(){
                 if (data.status === 'success') {
                     // Display QR code image
                     document.getElementById('qrCodeDisplay').innerHTML = `
-                        <img id="qrCodeImage" src="${data.qr_code_url}" alt="QR Code" class="max-w-full h-auto" style="max-width: 300px;">
+                        <img src="${data.qr_code_url}" alt="QR Code" class="max-w-full h-auto" style="max-width: 300px;">
                     `;
                     qrCodeSection.style.display = 'block';
-
-                    // Store QR data globally for download/share functions
-                    window.currentQRData = {
-                        imageUrl: data.qr_code_url,
-                        token: data.token,
-                        subject: document.getElementById('subject').options[document.getElementById('subject').selectedIndex].text,
-                        expiry: data.expiry_time,
-                        generated: new Date().toLocaleString(),
-                        locationRequired: document.getElementById('enableLocation').checked,
-                        directLink: data.qr_data || `${window.location.origin}/scan-attendance/?token=${data.token}`
-                    };
-
-                    // Update QR info display
-                    updateQRInfo();
 
                     // Start timer
                     startQRTimer(parseInt(expiryTime) * 60);
@@ -722,231 +574,6 @@ document.addEventListener("DOMContentLoaded", function(){
             messageDiv.remove();
         }, 5000);
     }
-
-    // Location method toggle handlers
-    document.getElementById('autoLocation').addEventListener('change', function() {
-        if (this.checked) {
-            document.getElementById('autoLocationDiv').style.display = 'block';
-            document.getElementById('manualLocationDiv').style.display = 'none';
-            document.getElementById('locationStatus').innerHTML = '<i class="fas fa-info-circle mr-1"></i>Click "Generate QR Code" to auto-detect your location';
-        }
-    });
-
-    document.getElementById('manualLocation').addEventListener('change', function() {
-        if (this.checked) {
-            document.getElementById('autoLocationDiv').style.display = 'none';
-            document.getElementById('manualLocationDiv').style.display = 'block';
-        }
-    });
-
-    // Enable/disable location section based on checkbox
-    document.getElementById('enableLocation').addEventListener('change', function() {
-        const locationSection = document.getElementById('locationSection');
-        if (this.checked) {
-            locationSection.style.display = 'block';
-        } else {
-            locationSection.style.display = 'none';
-            document.getElementById('currentCoordinates').textContent = 'Location verification disabled';
-        }
-    });
-
-    // Validate coordinates button
-    document.getElementById('validateLocationBtn').addEventListener('click', function() {
-        const lat = parseFloat(document.getElementById('manualLatitude').value);
-        const lon = parseFloat(document.getElementById('manualLongitude').value);
-        const validation = document.getElementById('locationValidation');
-
-        if (isNaN(lat) || isNaN(lon)) {
-            validation.innerHTML = '<span class="text-red-600"><i class="fas fa-times mr-1"></i>Please enter valid numbers</span>';
-            return;
-        }
-
-        if (lat < -90 || lat > 90) {
-            validation.innerHTML = '<span class="text-red-600"><i class="fas fa-times mr-1"></i>Latitude must be between -90 and 90</span>';
-            return;
-        }
-
-        if (lon < -180 || lon > 180) {
-            validation.innerHTML = '<span class="text-red-600"><i class="fas fa-times mr-1"></i>Longitude must be between -180 and 180</span>';
-            return;
-        }
-
-        validation.innerHTML = '<span class="text-green-600"><i class="fas fa-check mr-1"></i>Valid coordinates</span>';
-        document.getElementById('currentCoordinates').textContent = lat.toFixed(6) + ', ' + lon.toFixed(6) + ' (manual - not saved yet)';
-    });
-
-    // QR Code Download and Share Functions
-    function updateQRInfo() {
-        if (!window.currentQRData) return;
-
-        const data = window.currentQRData;
-        document.getElementById('qrInfoSubject').textContent = data.subject;
-        document.getElementById('qrInfoToken').textContent = data.token;
-        document.getElementById('qrInfoLink').textContent = data.directLink;
-        document.getElementById('qrInfoGenerated').textContent = data.generated;
-        document.getElementById('qrInfoExpires').textContent = data.expiry + ' minutes';
-        document.getElementById('qrInfoLocation').textContent = data.locationRequired ? 'Yes' : 'No';
-    }
-
-    // Download QR Code as Image
-    document.getElementById('downloadQRBtn').addEventListener('click', function() {
-        if (!window.currentQRData) {
-            alert('No QR code available to download');
-            return;
-        }
-
-        const link = document.createElement('a');
-        link.href = window.currentQRData.imageUrl;
-        link.download = `attendance-qr-${window.currentQRData.subject}-${new Date().toISOString().split('T')[0]}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showMessage('QR Code downloaded successfully!', 'success');
-    });
-
-    // Share QR Code
-    document.getElementById('shareQRBtn').addEventListener('click', async function() {
-        if (!window.currentQRData) {
-            alert('No QR code available to share');
-            return;
-        }
-
-        const shareData = {
-            title: `Attendance QR Code - ${window.currentQRData.subject}`,
-            text: `Scan this QR code to mark attendance for ${window.currentQRData.subject}`,
-            url: window.currentQRData.directLink
-        };
-
-        try {
-            if (navigator.share) {
-                // Use native sharing if available
-                await navigator.share(shareData);
-                showMessage('QR Code shared successfully!', 'success');
-            } else {
-                // Fallback: Copy to clipboard
-                await navigator.clipboard.writeText(
-                    `Attendance QR Code - ${window.currentQRData.subject}\n` +
-                    `Direct Link: ${window.currentQRData.directLink}\n` +
-                    `Token: ${window.currentQRData.token}\n` +
-                    `Expires in: ${window.currentQRData.expiry} minutes`
-                );
-                showMessage('QR Code details copied to clipboard!', 'success');
-            }
-        } catch (error) {
-            console.error('Error sharing:', error);
-            showMessage('Unable to share. Please try copying the link instead.', 'error');
-        }
-    });
-
-    // Print QR Code
-    document.getElementById('printQRBtn').addEventListener('click', function() {
-        if (!window.currentQRData) {
-            alert('No QR code available to print');
-            return;
-        }
-
-        const printWindow = window.open('', '_blank');
-        const data = window.currentQRData;
-
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Attendance QR Code - ${data.subject}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        text-align: center;
-                        padding: 20px;
-                        margin: 0;
-                    }
-                    .qr-container {
-                        border: 2px solid #000;
-                        padding: 20px;
-                        display: inline-block;
-                        margin: 20px;
-                    }
-                    .qr-info {
-                        margin-top: 20px;
-                        text-align: left;
-                        max-width: 400px;
-                        margin-left: auto;
-                        margin-right: auto;
-                    }
-                    .qr-info div {
-                        margin: 5px 0;
-                        padding: 3px 0;
-                        border-bottom: 1px dotted #ccc;
-                    }
-                    .qr-info strong {
-                        display: inline-block;
-                        width: 120px;
-                    }
-                    img {
-                        max-width: 300px;
-                        height: auto;
-                    }
-                    @media print {
-                        body { margin: 0; }
-                        .no-print { display: none; }
-                    }
-                </style>
-            </head>
-            <body>
-                <h1>Attendance QR Code</h1>
-                <div class="qr-container">
-                    <img src="${data.imageUrl}" alt="QR Code">
-                </div>
-                <div class="qr-info">
-                    <div><strong>Subject:</strong> ${data.subject}</div>
-                    <div><strong>Token:</strong> ${data.token}</div>
-                    <div><strong>Generated:</strong> ${data.generated}</div>
-                    <div><strong>Expires:</strong> ${data.expiry} minutes</div>
-                    <div><strong>Location Required:</strong> ${data.locationRequired ? 'Yes' : 'No'}</div>
-                    <div><strong>Direct Link:</strong> ${data.directLink}</div>
-                </div>
-                <div class="no-print" style="margin-top: 30px;">
-                    <button onclick="window.print()">Print</button>
-                    <button onclick="window.close()">Close</button>
-                </div>
-            </body>
-            </html>
-        `);
-
-        printWindow.document.close();
-        printWindow.focus();
-
-        // Auto-print after a short delay
-        setTimeout(() => {
-            printWindow.print();
-        }, 500);
-    });
-
-    // Copy Direct Link
-    document.getElementById('copyLinkBtn').addEventListener('click', async function() {
-        if (!window.currentQRData) {
-            alert('No QR code available');
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(window.currentQRData.directLink);
-            showMessage('Direct link copied to clipboard!', 'success');
-        } catch (error) {
-            console.error('Error copying to clipboard:', error);
-
-            // Fallback: Select text method
-            const textArea = document.createElement('textarea');
-            textArea.value = window.currentQRData.directLink;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-
-            showMessage('Direct link copied to clipboard!', 'success');
-        }
-    });
 });
 </script>
 {% endblock custom_js %}

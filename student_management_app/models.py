@@ -13,35 +13,6 @@ class SessionYearModel(models.Model):
     session_end_year = models.DateField()
     objects = models.Manager()
 
-    class Meta:
-        # Ensure no overlapping session years
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(session_end_year__gt=models.F('session_start_year')),
-                name='session_end_after_start'
-            )
-        ]
-        # Ensure unique session years
-        unique_together = ['session_start_year', 'session_end_year']
-
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        if self.session_end_year <= self.session_start_year:
-            raise ValidationError("Session end year must be after start year.")
-
-        # Check for overlapping sessions
-        overlapping = SessionYearModel.objects.filter(
-            models.Q(session_start_year__lte=self.session_end_year) &
-            models.Q(session_end_year__gte=self.session_start_year)
-        ).exclude(pk=self.pk)
-
-        if overlapping.exists():
-            raise ValidationError("Session years cannot overlap with existing sessions.")
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.session_start_year.year} - {self.session_end_year.year}"
 
@@ -76,113 +47,33 @@ class Staffs(models.Model):
 # ✅ Course Model
 class Courses(models.Model):
     id = models.AutoField(primary_key=True)
-    course_name = models.CharField(max_length=255, unique=True)  # Ensure unique course names
+    course_name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
-
-    class Meta:
-        verbose_name = "Course"
-        verbose_name_plural = "Courses"
-        ordering = ['course_name']
-
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        if not self.course_name or not self.course_name.strip():
-            raise ValidationError("Course name cannot be empty.")
-
-        # Check for duplicate course names (case-insensitive)
-        if Courses.objects.filter(
-            course_name__iexact=self.course_name.strip()
-        ).exclude(pk=self.pk).exists():
-            raise ValidationError(f"A course with name '{self.course_name}' already exists.")
-
-    def save(self, *args, **kwargs):
-        self.course_name = self.course_name.strip()  # Remove leading/trailing spaces
-        self.clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.course_name
 
 # ✅ Subject Model
 class Subjects(models.Model):
     id = models.AutoField(primary_key=True)
     subject_name = models.CharField(max_length=255)
-    course_id = models.ForeignKey(Courses, on_delete=models.CASCADE)  # Removed default=1
+    course_id = models.ForeignKey(Courses, on_delete=models.CASCADE, default=1)
     staff_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)  # ✅ References Staffs
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
-    class Meta:
-        verbose_name = "Subject"
-        verbose_name_plural = "Subjects"
-        # Ensure unique subject names within each course
-        unique_together = ['subject_name', 'course_id']
-        ordering = ['course_id', 'subject_name']
-
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        if not self.subject_name or not self.subject_name.strip():
-            raise ValidationError("Subject name cannot be empty.")
-
-        if not self.course_id:
-            raise ValidationError("Course is required.")
-
-        if not self.staff_id:
-            raise ValidationError("Staff assignment is required.")
-
-    def save(self, *args, **kwargs):
-        self.subject_name = self.subject_name.strip()
-        self.clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.subject_name} ({self.course_id.course_name})"
-
 # ✅ Student Model
 class Students(models.Model):
-    GENDER_CHOICES = [
-        ('Male', 'Male'),
-        ('Female', 'Female'),
-        ('Other', 'Other'),
-    ]
-
     id = models.AutoField(primary_key=True)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    gender = models.CharField(max_length=50, choices=GENDER_CHOICES, blank=True, null=True)
-    profile_pic = models.FileField(upload_to="profile_pics/", blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-    course_id = models.ForeignKey(Courses, on_delete=models.PROTECT)  # Changed to PROTECT
-    session_year_id = models.ForeignKey(SessionYearModel, on_delete=models.PROTECT)  # Changed to PROTECT
+    gender = models.CharField(max_length=50, blank=True, null=True)  # ✅ Allow blank
+    profile_pic = models.FileField(upload_to="profile_pics/", blank=True, null=True)  # ✅ Allow blank
+    address = models.TextField(blank=True, null=True)  # ✅ Allow blank
+    course_id = models.ForeignKey(Courses, on_delete=models.DO_NOTHING, default=1)
+    session_year_id = models.ForeignKey(SessionYearModel, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
-
-    class Meta:
-        verbose_name = "Student"
-        verbose_name_plural = "Students"
-        ordering = ['admin__first_name', 'admin__last_name']
-
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        if not self.course_id:
-            raise ValidationError("Course is required for student.")
-
-        if not self.session_year_id:
-            raise ValidationError("Session year is required for student.")
-
-        # Ensure the admin user is of student type
-        if self.admin and self.admin.user_type != '3':
-            raise ValidationError("Selected user must be of type 'Student'.")
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.admin.first_name} {self.admin.last_name} ({self.course_id.course_name})"
 
 # ✅ Attendance Model
 class Attendance(models.Model):
