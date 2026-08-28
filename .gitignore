@@ -29,7 +29,7 @@ media/*.tar.gz
 db.sqlite3
 
 # Distribution / packaging
-dist/
+# dist/
 build/
 *.egg-info/
 
