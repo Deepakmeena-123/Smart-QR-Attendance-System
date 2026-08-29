@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# exit on error
 set -o errexit
 
 # Install dependencies
@@ -11,8 +10,8 @@ python manage.py collectstatic --no-input --clear
 # Apply database migrations
 python manage.py migrate
 
-# Set up production database with default data
-echo "👤 Setting up default admin user and data..."
-python setup_production_db.py
+# Create/update deployment admin
+echo "Setting up admin user..."
+python manage.py createadmin
 
-echo "✅ Build completed successfully!"
+echo "Build completed successfully!"
