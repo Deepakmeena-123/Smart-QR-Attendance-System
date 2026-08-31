@@ -481,7 +481,7 @@ Interested in:
 ### Connect With Me
 
 - **GitHub:** [Deepak Meena](https://github.com/Deepakmeena-123)
-- **LinkedIn:** [Connect with me on LinkedIn](YOUR_LINKEDIN_URL)
+- **LinkedIn:** [Connect with me on LinkedIn](https://www.linkedin.com/in/deepak-meena-a28848372/)
 
 ---
 
